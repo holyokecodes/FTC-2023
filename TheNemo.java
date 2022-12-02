@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.TriggerReader;
+import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.RevIMU;
 
@@ -29,42 +30,64 @@ public class TheNemo extends LinearOpMode {
         RevIMU imu = new RevIMU(hardwareMap);
         imu.init();
 
-    Motor frontLeftMotor = new Motor (hardwareMap, "frontLeft");
-    Motor frontRightMotor = new Motor (hardwareMap, "frontRight");
-    Motor backLeftMotor = new Motor (hardwareMap, "backLeft");
-    Motor backRightMotor = new Motor (hardwareMap, "backRight");
-    
-    // Setup mecanum
-    MecanumDrive driveBase = new MecanumDrive (frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
+        Motor frontLeftMotor = new Motor (hardwareMap, "frontLeft");
+        Motor frontRightMotor = new Motor (hardwareMap, "frontRight");
+        Motor backLeftMotor = new Motor (hardwareMap, "backLeft");
+        Motor backRightMotor = new Motor (hardwareMap, "backRight");
         
-    // Setup controllers
-    GamepadEx controller1 = new GamepadEx(gamepad1);
-    
-    TriggerReader rightTrigger = new TriggerReader(controller1, GamepadKeys.Trigger.RIGHT_TRIGGER);
-    
-    double speed = 1.0;
-    
-    // Wait for the game to start (driver presses PLAY)
-    waitForStart();
-    runtime.reset();
-
-    // run until the end of the match (driver presses STOP)
-    while (opModeIsActive()) {
+        Motor armLifterMotor = new Motor (hardwareMap, "armLifter");
+        armLifterMotor.setRunMode(Motor.RunMode.VelocityControl);
+        
+        // Setup mecanum
+        MecanumDrive driveBase = new MecanumDrive (frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
             
-        rightTrigger.readValue();
+        // Setup controllers
+        GamepadEx controller1 = new GamepadEx(gamepad1);
         
-        if(rightTrigger.isDown()) {
-            speed = 0.25;
-        } else {
-            //speed modifier
-            speed = 1.0;
-        }
+        TriggerReader rightTrigger = new TriggerReader(controller1, GamepadKeys.Trigger.RIGHT_TRIGGER);
+        
+        ButtonReader leftBumper = new ButtonReader(controller1, GamepadKeys.Button.LEFT_BUMPER);
+        ButtonReader rightBumper = new ButtonReader(controller1, GamepadKeys.Button.RIGHT_BUMPER);
+        
+        double speed = 1.0;
+        
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+        runtime.reset();
+    
+        // run until the end of the match (driver presses STOP)
+        while (opModeIsActive()) {
             
-        // Strafe, Forward, Rotate
-        driveBase.driveFieldCentric(-controller1.getLeftX() * speed, controller1.getLeftY() * speed, -controller1.getRightX() * speed, -imu.getRotation2d().getDegrees(), false);
-        
-        telemetry.addData("Right Trigger", rightTrigger.isDown());
-        telemetry.update();
+            rightTrigger.readValue();
+            
+            if(rightTrigger.isDown()) {
+                speed = 0.25;
+            } else {
+                //speed modifier
+                speed = 1.0;
+            }
+            
+            leftBumper.readValue();
+            rightBumper.readValue();
+            
+            if(leftBumper.isDown()) {
+                // Lower arm
+                armLifterMotor.set(1);
+                telemetry.addData("Left Bumper", leftBumper.isDown());
+            } else if(rightBumper.isDown()) {
+                // Raise arm
+                armLifterMotor.set(-1);
+                telemetry.addData("Right Bumper", rightBumper.isDown());
+            } else {
+                // Arm still
+                armLifterMotor.set(0);
+            }
+                
+            // Strafe, Forward, Rotate
+            driveBase.driveFieldCentric(-controller1.getLeftX() * speed, controller1.getLeftY() * speed, -controller1.getRightX() * speed, -imu.getRotation2d().getDegrees(), false);
+            
+            telemetry.addData("Right Trigger", rightTrigger.isDown());
+            telemetry.update();
         
         }
     }
