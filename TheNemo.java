@@ -115,21 +115,22 @@ public class TheNemo extends LinearOpMode {
             
             
             
-            telemetry.addData("handOpen",handOpen);
-            telemetry.addData("handPosition",handMoverServo.getPosition());
-             
+            
+            //arm code 
             leftBumper.readValue();
             rightBumper.readValue();
             
             if(leftBumper.isDown()) {
                 //Lower arm
                 targetPosition += 1;
-                //telemetry.addData("Left Bumper", leftBumper.isDown());
+                
             } else if(rightBumper.isDown()) {
                 //Raise arm
                 targetPosition += -1;
-                //telemetry.addData("Right Bumper", rightBumper.isDown());
+                
             }
+            
+            
             
             if(targetPosition>MAX_ENCODER) {
                 targetPosition = MAX_ENCODER;
@@ -147,15 +148,18 @@ public class TheNemo extends LinearOpMode {
                 armLifterMotor.set(0.75);
             }
             
-         
+             //Strafe, Forward, Rotate
+            driveBase.driveFieldCentric(-controller1.getLeftX() * speed, controller1.getLeftY() * speed, -controller1.getRightX() * speed, -imu.getRotation2d().getDegrees(), false);
+            
+            //telemetry
             telemetry.addData("targetPosition", targetPosition);
             telemetry.addData("encoderPosition", armLifterMotor.getCurrentPosition());
-                
-            // Strafe, Forward, Rotate
-            // driveBase.driveFieldCentric(-controller1.getLeftX() * speed, controller1.getLeftY() * speed, -controller1.getRightX() * speed, -imu.getRotation2d().getDegrees(), false);
-            
-            //telemetry.addData("Right Trigger", rightTrigger.isDown());
+            telemetry.addData("handOpen",handOpen);
+            telemetry.addData("handPosition",handMoverServo.getPosition());
             telemetry.update();
+         
+            
+           
         
         }
     }
