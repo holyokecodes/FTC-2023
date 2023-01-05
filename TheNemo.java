@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+//imports
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -7,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -29,7 +29,7 @@ public class TheNemo extends LinearOpMode {
     //declare encoder variables
     static final int MAX_ENCODER = 0;
     static final int MIN_ENCODER = -3210;
-    
+
     @Override
     public void runOpMode() {
 
@@ -54,39 +54,43 @@ public class TheNemo extends LinearOpMode {
         armLifterMotor.setRunMode(Motor.RunMode.PositionControl);
         armLifterMotor.setPositionCoefficient(.05);
         armLifterMotor.setPositionTolerance(5);
-        
+
         // Setup mecanum
         MecanumDrive driveBase = new MecanumDrive (frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
-            
+
+        //setup controllers
         GamepadEx controller1 = new GamepadEx(gamepad1);
-        
+
         TriggerReader rightTrigger = new TriggerReader(controller1, GamepadKeys.Trigger.RIGHT_TRIGGER);
+
         ButtonReader leftBumper = new ButtonReader(controller1, GamepadKeys.Button.LEFT_BUMPER);
         ButtonReader rightBumper = new ButtonReader(controller1, GamepadKeys.Button.RIGHT_BUMPER);
         ButtonReader xButton = new ButtonReader(controller1, GamepadKeys.Button.X);
         ButtonReader aButton = new ButtonReader(controller1, GamepadKeys.Button.A);
         ButtonReader yButton = new ButtonReader(controller1, GamepadKeys.Button.Y);
-        ButtonReader dPadUp = new ButtonReader(controller1, GamepadKeys.Button.DPAD_UP);        
+        ButtonReader dPadUp = new ButtonReader(controller1, GamepadKeys.Button.DPAD_UP);
         ButtonReader dPadRight = new ButtonReader(controller1, GamepadKeys.Button.DPAD_RIGHT);
         ButtonReader dPadDown = new ButtonReader(controller1, GamepadKeys.Button.DPAD_DOWN);
         ButtonReader dPadLeft = new ButtonReader(controller1, GamepadKeys.Button.DPAD_LEFT);
-        
+
         //declare variables
         double speed = 1.0;
         boolean handOpen = true;
         double openAngle = 35;
         double closeAngle = 102;
         int targetPosition = -50;
-        
+
+        //open servo
         handMoverServo.turnToAngle(openAngle);
-        
-       armLifterMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-       
+
+        //set behavior to brake
+        armLifterMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
         // Wait for the game to start
         waitForStart();
         runtime.reset();
-        
-        
+
+
 
         //reset encoder
         armLifterMotor.resetEncoder();
@@ -96,7 +100,6 @@ public class TheNemo extends LinearOpMode {
         while (opModeIsActive()) {
 
             //speed modifier
-            rightTrigger.readValue();
 
             if(rightTrigger.isDown()) {
                 speed = 0.25;
@@ -111,13 +114,20 @@ public class TheNemo extends LinearOpMode {
                 handMoverServo.turnToAngle(handOpen ? openAngle : closeAngle); //if true, first if false, second
             }
 
-            //precise hand mover
+            //read controller
+            rightTrigger.readValue();
+            leftBumper.readValue();
+            rightBumper.readValue();
             aButton.readValue();
             yButton.readValue();
-            
-            //set angle to servo angle
+            dPadUp.readValue();
+            dPadRight.readValue();
+            dPadDown.readValue();
+            dPadLeft.readValue();
+
+            //precise hand mover
             double angle = handMoverServo.getAngle();
-            
+
             if(yButton.isDown() && angle > openAngle) {
                 handMoverServo.rotateByAngle(-.5);
             }
@@ -125,37 +135,9 @@ public class TheNemo extends LinearOpMode {
             if(aButton.isDown() && angle < closeAngle) {
                 handMoverServo.rotateByAngle(.5);
             }
-            
-            //arm raiser
-            telemetry.addData("handOpen",handOpen);
-             
-            dPadUp.readValue();
-            dPadRight.readValue();
-            dPadDown.readValue();
-            dPadLeft.readValue();
-            
-            telemetry.addData("dPadDown",dPadDown.isDown());
 
-            
-            
-            if(dPadDown.isDown()) {
-                 targetPosition = -50;
-            }
-            
-             if(dPadLeft.isDown()) {
-                 targetPosition = -1354;
-            }
-            
-             if(dPadUp.isDown()) {
-                 targetPosition = -2226; 
-            }
-            
-             if(dPadRight.isDown()) {
-                 targetPosition = -3210;
-            }
-            
-            leftBumper.readValue();
-            rightBumper.readValue();
+
+
 
             if(leftBumper.isDown()) {
                 //Lower arm
@@ -163,14 +145,31 @@ public class TheNemo extends LinearOpMode {
             } else if(rightBumper.isDown()) {
                 //Raise arm
                 targetPosition += -20;
-            
-            
+
+            //arm presets
+            if(dPadDown.isDown()) {
+                targetPosition = -50;
             }
+
+            if(dPadLeft.isDown()) {
+                targetPosition = -1354;
+            }
+
+            if(dPadUp.isDown()) {
+                targetPosition = -2226;
+            }
+
+            if(dPadRight.isDown()) {
+                targetPosition = -3210;
+            }
+
+            }
+
             //arm lifter safety
             if(targetPosition > MAX_ENCODER) {
                 targetPosition = MAX_ENCODER;
             }
-            
+
             if(targetPosition < MIN_ENCODER) {
                 targetPosition = MIN_ENCODER;
             }
@@ -184,24 +183,30 @@ public class TheNemo extends LinearOpMode {
             } else {
                 armLifterMotor.set(0.275);
             }
-            
-         
-            //telemetry.addData("targetPosition", targetPosition);
-            //telemetry.addData("encoderPosition", armLifterMotor.getCurrentPosition());
-            
+
+
+            //set variables
             double strafeSpeed = -controller1.getLeftX() * speed;
             double fowardSpeed = controller1.getLeftY() * speed;
             double rotateSpeed =  -controller1.getRightX() * speed;
             double heading = -imu.getRotation2d().getDegrees();
-            
+
+            //move robot
+            driveBase.driveFieldCentric(strafeSpeed, fowardSpeed, rotateSpeed,heading, false);
+
+            //telemetry
+
+            //telemetry.addData("targetPosition", targetPosition);
+            //telemetry.addData("encoderPosition", armLifterMotor.getCurrentPosition());
+            //telemetry.addData("handOpen",handOpen);
+
+            telemetry.addData("dPadDown",dPadDown.isDown());
             telemetry.addData("strafeSpeed", strafeSpeed);
             telemetry.addData("fowardSpeed", fowardSpeed);
             telemetry.addData("rotateSpeed", rotateSpeed);
-            
-            driveBase.driveFieldCentric(strafeSpeed, fowardSpeed, rotateSpeed,heading, false);
-            
             telemetry.addData("Servo Angle", handMoverServo.getAngle());
 
+            //update telemetry
             telemetry.update();
 
         }
