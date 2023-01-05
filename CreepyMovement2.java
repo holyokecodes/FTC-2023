@@ -37,54 +37,51 @@ public class CreepyMovement2 extends LinearOpMode {
         Motor frontRightMotor = new Motor (hardwareMap, "frontRight");
         Motor backLeftMotor = new Motor (hardwareMap, "backLeft");
         Motor backRightMotor = new Motor (hardwareMap, "backRight");
+        
     
         MecanumDrive driveBase = new MecanumDrive (frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
-        
-        Translation2d frontLeftMotorLocation = new Translation2d(0.216, 0.216);     
-        Translation2d frontRightMotorLocation = new Translation2d(0.216, -0.216);
-        Translation2d backLeftMotorLocation = new Translation2d(-0.216, 0.216);
-        Translation2d backRightMotorLocation = new Translation2d(-0.216, -0.216);
-        
-        MecanumDriveKinematics kinematics = new MecanumDriveKinematics
-        (
-            frontLeftMotorLocation, frontRightMotorLocation,
-            backLeftMotorLocation, backRightMotorLocation
-        );
-        
-        
-        
-        // MecanumDriveOdometry odometry = new MecanumDriveOdometry
-        // (
-        //     kinematics, imu.getRotation2d()
-        // );
-        
-        // Pose2d target = new Pose2d(0, 1, new Rotation2d());
-        // Pose2d current = new Pose2d(0, 0, new Rotation2d());
-        
-        // waitForStart();
-        
-        // Waypoint p1 = new StartWaypoint(0, 0);
-        // Waypoint p2 = new GeneralWaypoint(0, 1);
-        
-        // Path path = new Path(p1, p2);
-        
-        // waitForStart();
-        
-        // while(opModeIsActive() && !isStopRequested()) {
-        //     MecanumDriveWheelSpeeds wheelSpeeds = new MecanumDriveWheelSpeeds
-        //     (
-        //         frontLeftMotor.getRate(), frontRightMotor.getRate(),
-        //         backLeftMotor.getRate(), backRightMotor.getRate()
-        //     );
-            
-        //     current = odometry.updateWithTime(time.time(), imu.getRotation2d(), wheelSpeeds);
-       
-        //     double xDiff = current.getX() - target.getX();
-        //     double yDiff = current.getY() - target.getY();
 
+        
+        double strafeSpeed;
+        double fowardSpeed;
+        double rotateSpeed;
+        double heading;
+        
+        waitForStart();
+        
+       
+        while(opModeIsActive() && !isStopRequested()) {
+           
             
-        //     driveBase.driveFieldCentric(xDiff, yDiff, 0, imu.getRotation2d().getDegrees());
+           
+           
+        
+            requestOpModeStop();
+        
             
-        // }
+        }    
+    }
+    
+    public void driveFoward() {
+      
+        double startTime = getRuntime();
+
+        double strafeSpeed = 0;
+        double fowardSpeed = 1;
+        double rotateSpeed = 0;
+        double heading = 0;
+            
+      
+    }
+    
+        public void drive(double strafeSpeed, double startTime, double fowardSpeed, double rotateSpeed, double heading ) {
+    
+        while(getRuntime() - startTime < time && opModeIsActive()) {
+    
+           this.driveBase.driveFieldCentric(strafeSpeed, fowardSpeed, rotateSpeed,heading);
+        
+           }  
+    
+    
     }
 }
