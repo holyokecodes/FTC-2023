@@ -25,6 +25,10 @@ import com.arcrobotics.ftclib.purepursuit.Waypoint;
 @Autonomous
 
 public class CreepyMovement2 extends LinearOpMode {
+
+    // Declare the global variable
+    MecanumDrive driveBase;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -42,7 +46,8 @@ public class CreepyMovement2 extends LinearOpMode {
         Motor backLeftMotor = new Motor (hardwareMap, "backLeft");
         Motor backRightMotor = new Motor (hardwareMap, "backRight");
 
-        MecanumDrive driveBase = new MecanumDrive (frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
+        // Set the drivebase before using it
+        driveBase = new MecanumDrive (frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
 
         //declare variables
         double strafeSpeed;
@@ -83,10 +88,9 @@ public class CreepyMovement2 extends LinearOpMode {
 
         while(getRuntime() - startTime < time && opModeIsActive()) {
 
-            this.driveBase.driveFieldCentric(strafeSpeed, fowardSpeed, rotateSpeed,heading);
+            // this. is only needed if a parameter has the same name
+            driveBase.driveFieldCentric(strafeSpeed, fowardSpeed, rotateSpeed,heading);
 
         }
-
-
     }
 }
