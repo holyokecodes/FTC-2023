@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-//imports
+// imports
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -26,7 +26,7 @@ public class TheNemo extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
-    //declare encoder variables
+    // declare encoder variables
     static final int MAX_ENCODER = 0;
     static final int MIN_ENCODER = -3210;
 
@@ -37,11 +37,11 @@ public class TheNemo extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        //set up revIMU
+        // set up revIMU
         RevIMU imu = new RevIMU(hardwareMap);
         imu.init();
 
-        //set up servos
+        // set up servos
         SimpleServo handMoverServo = new SimpleServo (hardwareMap, "handMover", 0, 180);
 
         //set up motors
@@ -53,12 +53,12 @@ public class TheNemo extends LinearOpMode {
 
         armLifterMotor.setRunMode(Motor.RunMode.PositionControl);
         armLifterMotor.setPositionCoefficient(.05);
-        armLifterMotor.setPositionTolerance(5);
+        armLifterMotor.setPositionTolerance(3);
 
         // Setup mecanum
         MecanumDrive driveBase = new MecanumDrive (frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
 
-        //setup controllers
+        // setup controllers
         GamepadEx controller1 = new GamepadEx(gamepad1);
 
         TriggerReader rightTrigger = new TriggerReader(controller1, GamepadKeys.Trigger.RIGHT_TRIGGER);
@@ -72,34 +72,55 @@ public class TheNemo extends LinearOpMode {
         ButtonReader dPadRight = new ButtonReader(controller1, GamepadKeys.Button.DPAD_RIGHT);
         ButtonReader dPadDown = new ButtonReader(controller1, GamepadKeys.Button.DPAD_DOWN);
         ButtonReader dPadLeft = new ButtonReader(controller1, GamepadKeys.Button.DPAD_LEFT);
+        ButtonReader bButton = new ButtonReader(controller1, GamepadKeys.Button.B);
 
-        //declare variables
+        // declare variables
         double speed = 1.0;
         boolean handOpen = true;
-        double openAngle = 35;
-        double closeAngle = 102;
-        int targetPosition = -50;
+        int targetPosition = -72;
+        double closeAngle = 90;
+        double openAngle = 25;
 
-        //open servo
-        handMoverServo.turnToAngle(openAngle);
+        
 
-        //set behavior to brake
+        // set behavior to brake
         armLifterMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-
+        
+        //praise shrek (very important)
+        telemetry.addData("Shrek Is With You", " ");
+        telemetry.update();
+        
         // Wait for the game to start
         waitForStart();
         runtime.reset();
-
-
-
-        //reset encoder
+        handMoverServo.turnToAngle(openAngle);
+        armLifterMotor.setTargetPosition(targetPosition);
         armLifterMotor.resetEncoder();
-
-
+        
         // run until the end of the match
         while (opModeIsActive()) {
+            
+            
+            
+                
+            
+            
+            // if(bButton.wasJustPressed()) {
+            //     handMoverServo.turnToAngle(openAngle);
+            //     while(handMoverServo.getAngle()  != openAngle && opModeIsActive()) {};
+            //     handMoverServo.turnToAngle(closeAngle);
+            //     while(handMoverServo.getAngle() != closeAngle && opModeIsActive()) {};
+            //     targetPosition = -200;
+            //     armLifterMotor.setTargetPosition(targetPosition);
+            //     targetPosition = -50;
+            //     armLifterMotor.setTargetPosition(targetPosition);
+                
+                
 
-            //speed modifier
+            // }
+            
+            
+            // speed modifier
 
             if(rightTrigger.isDown()) {
                 speed = 0.25;
@@ -107,14 +128,14 @@ public class TheNemo extends LinearOpMode {
                 speed = 1.0;
             }
 
-            //hand opener and closer
+            // hand opener and closer
             xButton.readValue();
             if(xButton.wasJustPressed()) {
                 handOpen = !handOpen; //switch true or false
-                handMoverServo.turnToAngle(handOpen ? openAngle : closeAngle); //if true, first if false, second
+                handMoverServo.turnToAngle(handOpen ? openAngle : closeAngle); //if true, first.  if false, second
             }
 
-            //read controller
+            // read controller
             rightTrigger.readValue();
             leftBumper.readValue();
             rightBumper.readValue();
@@ -124,8 +145,10 @@ public class TheNemo extends LinearOpMode {
             dPadRight.readValue();
             dPadDown.readValue();
             dPadLeft.readValue();
+            bButton.readValue();
 
-            //precise hand mover
+
+            // precise hand mover
             double angle = handMoverServo.getAngle();
 
             if(yButton.isDown() && angle > openAngle) {
@@ -138,15 +161,15 @@ public class TheNemo extends LinearOpMode {
 
 
 
-
             if(leftBumper.isDown()) {
-                //Lower arm
+                // Lower arm
                 targetPosition += 20;
             } else if(rightBumper.isDown()) {
-                //Raise arm
+                // Raise arm
                 targetPosition += -20;
+            }
 
-            //arm presets
+            // arm presets
             if(dPadDown.isDown()) {
                 targetPosition = -50;
             }
@@ -160,12 +183,15 @@ public class TheNemo extends LinearOpMode {
             }
 
             if(dPadRight.isDown()) {
-                targetPosition = -3210;
+                targetPosition = -3200;
             }
 
+            if(bButton.isDown()) {
+                targetPosition = -400;
             }
+            
 
-            //arm lifter safety
+            // arm lifter safety
             if(targetPosition > MAX_ENCODER) {
                 targetPosition = MAX_ENCODER;
             }
@@ -177,7 +203,7 @@ public class TheNemo extends LinearOpMode {
             //actually move arm
             armLifterMotor.setTargetPosition(targetPosition);
 
-            //brake motor
+            // brake motor
             if (armLifterMotor.atTargetPosition()){
                 armLifterMotor.stopMotor();
             } else {
@@ -185,27 +211,29 @@ public class TheNemo extends LinearOpMode {
             }
 
 
-            //set variables
+            // set variables
             double strafeSpeed = -controller1.getLeftX() * speed;
             double fowardSpeed = controller1.getLeftY() * speed;
             double rotateSpeed =  -controller1.getRightX() * speed;
             double heading = -imu.getRotation2d().getDegrees();
 
-            //move robot
+            // move robot
             driveBase.driveFieldCentric(strafeSpeed, fowardSpeed, rotateSpeed,heading, false);
 
-            //telemetry
+            // telemetry
 
-            //telemetry.addData("targetPosition", targetPosition);
-            //telemetry.addData("encoderPosition", armLifterMotor.getCurrentPosition());
-            //telemetry.addData("handOpen",handOpen);
-
-            telemetry.addData("dPadDown",dPadDown.isDown());
-            telemetry.addData("strafeSpeed", strafeSpeed);
-            telemetry.addData("fowardSpeed", fowardSpeed);
-            telemetry.addData("rotateSpeed", rotateSpeed);
+            telemetry.addData("targetPosition", targetPosition);
+            telemetry.addData("encoderPosition", armLifterMotor.getCurrentPosition());
+            // telemetry.addData("handOpen",handOpen);
             telemetry.addData("Servo Angle", handMoverServo.getAngle());
+            // telemetry.addData("dPadDown",dPadDown.isDown());
+            // telemetry.addData("strafeSpeed", strafeSpeed);
+            // telemetry.addData("fowardSpeed", fowardSpeed);
+            // telemetry.addData("rotateSpeed", rotateSpeed);
+            telemetry.addData("Heading", heading);
+            telemetry.addData("RobotAngle", imu.getHeading());
 
+            
             //update telemetry
             telemetry.update();
 
